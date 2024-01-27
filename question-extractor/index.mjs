@@ -3,7 +3,7 @@ import { load } from "cheerio";
 import path from "path";
 
 const htmlFolderPath = "./html";
-const jsonOutputFile = "../questions.json";
+const jsonOutputFile = "../tester-ui/src/assets/questions.json";
 
 const htmlFileNames = fs.readdirSync(htmlFolderPath);
 let questions = [];
@@ -26,6 +26,7 @@ function scrapeQuestionsFromFile(filePath) {
     .toArray()
     .forEach((card) => {
       questions.push({
+        id: $(card).find(".card-header").contents().first().text().trim(),
         question: $(card).find(".card-text").first().text().trim(),
         choices: $(card)
           .find(".multi-choice-item")
