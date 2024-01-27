@@ -16,7 +16,10 @@ class QuestionsDatabase extends Dexie {
     this.version(1).stores({
       questions: "++id,question,choices,answers",
     });
-    this.questions.bulkAdd(questions);
+
+    this.questions.count().then((count) => {
+      if (count === 0) this.questions.bulkAdd(questions);
+    });
   }
 }
 
