@@ -1,10 +1,9 @@
 import { Button } from "@nextui-org/react";
-import { db } from "./store/questionsDb";
-import { useLiveQuery } from "dexie-react-hooks";
 import { Link } from "react-router-dom";
+import { useQuestionsStore } from "./store/questionsStore";
 
 function App() {
-  const questionsLength = useLiveQuery(() => db.questions.count());
+  const questionsLength = useQuestionsStore((state) => state.size);
   return (
     <>
       <Link to="/study">
