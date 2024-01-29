@@ -1,22 +1,19 @@
 import { create } from "zustand";
 import { QuestionId, useQuestionsStore } from "./questionsStore";
 import { createJSONStorage, persist } from "zustand/middleware";
+import isEqual from "lodash/isEqual";
+import sortBy from "lodash/sortBy";
 
 const ANSWER_HISTORY_LENGTH = 5;
 
-export class Answer {
-  answers: string[];
+export type Answer = {
+  userAnswers: string[];
   isCorrect: boolean;
-
-  constructor(answers: string[] = [], isCorrect: boolean = false) {
-    this.answers = answers;
-    this.isCorrect = isCorrect;
-  }
-}
+};
 
 interface AnswerStore {
   answerHistoryMap: Map<QuestionId, Answer[]>;
-  setAnswer: (questionId: QuestionId, answers: string[]) => boolean;
+  setUserAnswers: (questionId: QuestionId, answers: string[]) => boolean;
   getMostRecentAnswer: (questionId: QuestionId) => Answer | undefined;
 }
 
@@ -24,16 +21,18 @@ export const useAnswerStore = create<AnswerStore>()(
   persist(
     (set, get) => ({
       answerHistoryMap: new Map<QuestionId, Answer[]>(),
-      setAnswer: (questionId: string, answers: string[]) => {
-        const question = useQuestionsStore()
+      setUserAnswers: (questionId: string, userAnswers: string[]) => {
+        const question = useQuestionsStore
+          .getState()
           .getById(questionId)
           .get(questionId);
-        const isCorrect =
-          answers.every((answer) => question?.answers.includes(answer)) &&
-          answers.length === question?.answers.length;
+        const isCorrect = isEqual(
+          sortBy(question?.answers),
+          sortBy(userAnswers)
+        );
 
         let answerHistory = get().answerHistoryMap.get(questionId) ?? [];
-        answerHistory.unshift(new Answer(answers, isCorrect));
+        answerHistory.unshift({ userAnswers, isCorrect });
         answerHistory = answerHistory.slice(0, ANSWER_HISTORY_LENGTH);
 
         set((state) => ({

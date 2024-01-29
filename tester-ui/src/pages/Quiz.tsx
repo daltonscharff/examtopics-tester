@@ -5,58 +5,61 @@ import {
   Radio,
   RadioGroup,
 } from "@nextui-org/react";
-import { useCallback, useMemo, useState } from "react";
-import {
-  Question,
-  QuestionId,
-  useQuestionsStore,
-} from "../store/questionsStore";
+import { useState } from "react";
+import { Question, useQuestionsStore } from "../store/questionsStore";
 import { useParams } from "react-router-dom";
-import { Answer } from "../store/answerStore";
-import isEqual from "lodash/isEqual";
-import sortBy from "lodash/sortBy";
+import { Answer, useAnswerStore } from "../store/answerStore";
 
-type QuizAnswer = Answer & { isSubmitted: boolean };
+type QuizQuestion = Question & Answer & { isSubmitted: boolean };
 
 function Quiz() {
   const { questionRange } = useParams();
   const getQuestions = useQuestionsStore((state) => state.getQuestions);
-
+  const setUserAnswers = useAnswerStore((state) => state.setUserAnswers);
   const [begin, end] = questionRange!.split("...");
-  const questions = getQuestions(
-    parseInt(begin, 10) - 1,
-    parseInt(end, 10) - 1
-  );
 
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(
+    getQuestions(parseInt(begin, 10) - 1, parseInt(end, 10) - 1).map(
+      (question) => ({
+        ...question,
+        userAnswers: [],
+        isCorrect: false,
+        isSubmitted: false,
+      })
+    )
+  );
   const [index, setIndex] = useState(0);
-  const [quizAnswerMap, setQuizAnswerMap] = useState(
-    new Map<QuestionId, QuizAnswer>()
-  );
-  const currentQuestion = questions[index];
-
+  const currentQuestion = quizQuestions[index];
   if (!currentQuestion) return "Loading";
 
-  const setQuizAnswers = useCallback(
-    (answers: QuizAnswer["answers"]) => {
-      setQuizAnswerMap(
-        new Map<QuestionId, QuizAnswer>(quizAnswerMap).set(currentQuestion.id, {
-          answers,
-          isCorrect: false,
-          isSubmitted: false,
-        })
-      );
-    },
-    [currentQuestion]
-  );
+  const selectQuizAnswers = (userAnswers: QuizQuestion["userAnswers"]) => {
+    const questionList = [...quizQuestions];
+    questionList[index] = { ...questionList[index], userAnswers };
+    setQuizQuestions(questionList);
+  };
+
+  const submitQuizAnswers = () => {
+    const isCorrect = setUserAnswers(
+      currentQuestion.id,
+      currentQuestion.userAnswers
+    );
+    const questionList = [...quizQuestions];
+    questionList[index] = {
+      ...questionList[index],
+      isCorrect,
+      isSubmitted: true,
+    };
+    setQuizQuestions(questionList);
+  };
 
   return (
     <>
       <p>{currentQuestion.question}</p>
-
       {currentQuestion.answers.length === 1 ? (
         <RadioGroup
-          value={quizAnswerMap.get(currentQuestion.id)?.answers[0] ?? ""}
-          onValueChange={(change) => setQuizAnswers([change])}
+          value={currentQuestion.userAnswers[0] ?? ""}
+          onValueChange={(change) => selectQuizAnswers([change])}
+          isDisabled={currentQuestion.isSubmitted}
         >
           {currentQuestion.choices.map((choice) => (
             <Radio value={choice.letter} key={"choice" + choice.letter}>
@@ -66,8 +69,9 @@ function Quiz() {
         </RadioGroup>
       ) : (
         <CheckboxGroup
-          value={quizAnswerMap.get(currentQuestion.id)?.answers}
-          onValueChange={(change) => setQuizAnswers(change)}
+          value={currentQuestion.userAnswers}
+          onValueChange={(change) => selectQuizAnswers(change)}
+          isDisabled={currentQuestion.isSubmitted}
         >
           {currentQuestion.choices.map((choice) => (
             <Checkbox value={choice.letter} key={"choice" + choice.letter}>
@@ -78,23 +82,8 @@ function Quiz() {
       )}
 
       <Button
-        onClick={() => {
-          const quizAnswers =
-            quizAnswerMap.get(currentQuestion.id)?.answers ?? [];
-          const actualAnswers = currentQuestion.answers;
-          const isCorrect = isEqual(sortBy(quizAnswers), sortBy(actualAnswers));
-          setQuizAnswerMap(
-            new Map<QuestionId, QuizAnswer>(quizAnswerMap).set(
-              currentQuestion.id,
-              {
-                answers: quizAnswers,
-                isCorrect,
-                isSubmitted: true,
-              }
-            )
-          );
-        }}
-        disabled={quizAnswerMap.get(currentQuestion.id)?.answers?.length === 0}
+        onClick={submitQuizAnswers}
+        disabled={currentQuestion.userAnswers.length === 0}
       >
         Check Answer
       </Button>
@@ -103,10 +92,7 @@ function Quiz() {
       </Button>
       <Button
         onClick={() => setIndex(index + 1)}
-        disabled={
-          index >= questions.length ||
-          !quizAnswerMap.get(currentQuestion.id)?.isSubmitted
-        }
+        disabled={index >= quizQuestions.length || !currentQuestion.isSubmitted}
       >
         Next
       </Button>
