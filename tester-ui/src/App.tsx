@@ -2,17 +2,28 @@ import { Button } from "@nextui-org/react";
 import { Link } from "react-router-dom";
 import { useQuestionsStore } from "./store/questionsStore";
 
+const QUIZ_LENGTH = 10;
+
 function App() {
-  const questionsLength = useQuestionsStore((state) => state.size);
+  const numOfQuestions = useQuestionsStore((state) => state.size);
+  const quizStartingNumbers = [];
+  for (let i = 1; i < numOfQuestions; i += QUIZ_LENGTH) {
+    quizStartingNumbers.push(i);
+  }
+
   return (
     <>
-      <Link to="/study">
-        <Button>Study</Button>
-      </Link>
-      <Link to="/quiz">
-        <Button>Quiz</Button>
-      </Link>
-      <p>{questionsLength} Questions!</p>
+      <p>{numOfQuestions} Questions!</p>
+      {quizStartingNumbers.map((start) => {
+        const end = start + QUIZ_LENGTH - 1;
+        return (
+          <Link to={`/quiz/${start}...${end}`} key={`/quiz/${start}...${end}`}>
+            <Button>
+              Questions {start} - {end}
+            </Button>
+          </Link>
+        );
+      })}
     </>
   );
 }

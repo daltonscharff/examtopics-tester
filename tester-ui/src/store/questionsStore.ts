@@ -1,6 +1,6 @@
 import questions from "../assets/questions.json";
 import { create } from "zustand";
-import { shuffleArray } from "../utils";
+import shuffle from "lodash/shuffle";
 
 export type Question = {
   id: string;
@@ -15,6 +15,7 @@ interface QuestionsStore {
   size: number;
   getById: (...questionIds: QuestionId[]) => Map<QuestionId, Question>;
   getRandomQuestion: (quantity: number) => Question[];
+  getQuestions: (offset: number, limit: number) => Question[];
 }
 
 const questionsMap = new Map<QuestionId, Question>();
@@ -37,6 +38,8 @@ export const useQuestionsStore = create<QuestionsStore>(() => ({
     if (quantity >= maxLength) {
       quantity = maxLength;
     }
-    return shuffleArray(questions).slice(0, quantity);
+    return shuffle(questions).slice(0, quantity);
   },
+  getQuestions: (offset: number, limit: number) =>
+    questions.slice(offset, limit),
 }));

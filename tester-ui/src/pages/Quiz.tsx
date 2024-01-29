@@ -5,46 +5,111 @@ import {
   Radio,
   RadioGroup,
 } from "@nextui-org/react";
-import { useQuizStore } from "../store/quizStore";
-import { useMemo, useState } from "react";
-import { useQuestionsStore } from "../store/questionsStore";
+import { useCallback, useMemo, useState } from "react";
+import {
+  Question,
+  QuestionId,
+  useQuestionsStore,
+} from "../store/questionsStore";
+import { useParams } from "react-router-dom";
+import { Answer } from "../store/answerStore";
+import isEqual from "lodash/isEqual";
+import sortBy from "lodash/sortBy";
+
+type QuizAnswer = Answer & { isSubmitted: boolean };
 
 function Quiz() {
-  const quiz = useQuizStore((state) => state.quiz);
-  const setQuiz = useQuizStore((state) => state.setQuiz);
-  const getQuestionsById = useQuestionsStore((state) => state.getById);
+  const { questionRange } = useParams();
+  const getQuestions = useQuestionsStore((state) => state.getQuestions);
 
-  const questionIds = useMemo(() => Array.from(quiz.keys()), [quiz]);
-  const questions = useMemo(() => getQuestionsById(...questionIds), [quiz]);
+  const [begin, end] = questionRange!.split("...");
+  const questions = getQuestions(
+    parseInt(begin, 10) - 1,
+    parseInt(end, 10) - 1
+  );
 
   const [index, setIndex] = useState(0);
-  const currentQuestion = useMemo(
-    () => questions.get(questionIds[index]),
-    [questionIds, index]
+  const [quizAnswerMap, setQuizAnswerMap] = useState(
+    new Map<QuestionId, QuizAnswer>()
   );
+  const currentQuestion = questions[index];
 
   if (!currentQuestion) return "Loading";
 
-  const AnswerGroupComponent =
-    currentQuestion.answers.length === 1 ? RadioGroup : CheckboxGroup;
-  const AnswerSelectionComponent =
-    currentQuestion.answers.length === 1 ? Radio : Checkbox;
+  const setQuizAnswers = useCallback(
+    (answers: QuizAnswer["answers"]) => {
+      setQuizAnswerMap(
+        new Map<QuestionId, QuizAnswer>(quizAnswerMap).set(currentQuestion.id, {
+          answers,
+          isCorrect: false,
+          isSubmitted: false,
+        })
+      );
+    },
+    [currentQuestion]
+  );
 
   return (
     <>
-      <p>Quiz: {JSON.stringify(Array.from(quiz.keys()))}</p>
-      <Button onClick={() => setQuiz(10)}>setQuiz</Button>
-
       <p>{currentQuestion.question}</p>
-      <AnswerGroupComponent>
-        {currentQuestion.choices.map((choice) => {
-          return (
-            <AnswerSelectionComponent value={choice.letter}>
+
+      {currentQuestion.answers.length === 1 ? (
+        <RadioGroup
+          value={quizAnswerMap.get(currentQuestion.id)?.answers[0] ?? ""}
+          onValueChange={(change) => setQuizAnswers([change])}
+        >
+          {currentQuestion.choices.map((choice) => (
+            <Radio value={choice.letter} key={"choice" + choice.letter}>
               {choice.letter}. {choice.text}
-            </AnswerSelectionComponent>
+            </Radio>
+          ))}
+        </RadioGroup>
+      ) : (
+        <CheckboxGroup
+          value={quizAnswerMap.get(currentQuestion.id)?.answers}
+          onValueChange={(change) => setQuizAnswers(change)}
+        >
+          {currentQuestion.choices.map((choice) => (
+            <Checkbox value={choice.letter} key={"choice" + choice.letter}>
+              {choice.letter}. {choice.text}
+            </Checkbox>
+          ))}
+        </CheckboxGroup>
+      )}
+
+      <Button
+        onClick={() => {
+          const quizAnswers =
+            quizAnswerMap.get(currentQuestion.id)?.answers ?? [];
+          const actualAnswers = currentQuestion.answers;
+          const isCorrect = isEqual(sortBy(quizAnswers), sortBy(actualAnswers));
+          setQuizAnswerMap(
+            new Map<QuestionId, QuizAnswer>(quizAnswerMap).set(
+              currentQuestion.id,
+              {
+                answers: quizAnswers,
+                isCorrect,
+                isSubmitted: true,
+              }
+            )
           );
-        })}
-      </AnswerGroupComponent>
+        }}
+        disabled={quizAnswerMap.get(currentQuestion.id)?.answers?.length === 0}
+      >
+        Check Answer
+      </Button>
+      <Button onClick={() => setIndex(index - 1)} disabled={index === 0}>
+        Previous
+      </Button>
+      <Button
+        onClick={() => setIndex(index + 1)}
+        disabled={
+          index >= questions.length ||
+          !quizAnswerMap.get(currentQuestion.id)?.isSubmitted
+        }
+      >
+        Next
+      </Button>
     </>
   );
 }
