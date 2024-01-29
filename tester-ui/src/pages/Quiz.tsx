@@ -4,6 +4,7 @@ import {
   CheckboxGroup,
   Radio,
   RadioGroup,
+  cn,
 } from "@nextui-org/react";
 import { useState } from "react";
 import { Question, useQuestionsStore } from "../store/questionsStore";
@@ -62,7 +63,15 @@ function Quiz() {
           isDisabled={currentQuestion.isSubmitted}
         >
           {currentQuestion.choices.map((choice) => (
-            <Radio value={choice.letter} key={"choice" + choice.letter}>
+            <Radio
+              value={choice.letter}
+              key={"choice" + choice.letter}
+              className={cn(
+                currentQuestion.isSubmitted &&
+                  currentQuestion.answers.includes(choice.letter) &&
+                  "border-2 border-green-600"
+              )}
+            >
               {choice.letter}. {choice.text}
             </Radio>
           ))}
@@ -74,7 +83,15 @@ function Quiz() {
           isDisabled={currentQuestion.isSubmitted}
         >
           {currentQuestion.choices.map((choice) => (
-            <Checkbox value={choice.letter} key={"choice" + choice.letter}>
+            <Checkbox
+              value={choice.letter}
+              key={"choice" + choice.letter}
+              className={cn(
+                currentQuestion.isSubmitted &&
+                  currentQuestion.answers.includes(choice.letter) &&
+                  "border-2 border-green-600"
+              )}
+            >
               {choice.letter}. {choice.text}
             </Checkbox>
           ))}
