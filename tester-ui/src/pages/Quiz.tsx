@@ -1,7 +1,13 @@
 import {
   Button,
+  ButtonGroup,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
   Checkbox,
   CheckboxGroup,
+  Divider,
   Radio,
   RadioGroup,
   cn,
@@ -54,66 +60,98 @@ function Quiz() {
   };
 
   return (
-    <>
-      <p>{currentQuestion.question}</p>
-      {currentQuestion.answers.length === 1 ? (
-        <RadioGroup
-          value={currentQuestion.userAnswers[0] ?? ""}
-          onValueChange={(change) => selectQuizAnswers([change])}
-          isDisabled={currentQuestion.isSubmitted}
-        >
-          {currentQuestion.choices.map((choice) => (
-            <Radio
-              value={choice.letter}
-              key={"choice" + choice.letter}
-              className={cn(
-                currentQuestion.isSubmitted &&
-                  currentQuestion.answers.includes(choice.letter) &&
-                  "border-2 border-green-600"
-              )}
+    <main className={cn("container mx-auto p-2 py-3")}>
+      <Card>
+        <CardHeader className={cn("px-6")}>{currentQuestion.id}</CardHeader>
+        <Divider />
+        <CardBody className={cn("flex flex-col gap-4 px-6")}>
+          <p>{currentQuestion.question}</p>
+          {currentQuestion.answers.length === 1 ? (
+            <RadioGroup
+              value={currentQuestion.userAnswers[0] ?? ""}
+              onValueChange={(change) => selectQuizAnswers([change])}
+              isDisabled={currentQuestion.isSubmitted}
             >
-              {choice.letter}. {choice.text}
-            </Radio>
-          ))}
-        </RadioGroup>
-      ) : (
-        <CheckboxGroup
-          value={currentQuestion.userAnswers}
-          onValueChange={(change) => selectQuizAnswers(change)}
-          isDisabled={currentQuestion.isSubmitted}
-        >
-          {currentQuestion.choices.map((choice) => (
-            <Checkbox
-              value={choice.letter}
-              key={"choice" + choice.letter}
-              className={cn(
-                currentQuestion.isSubmitted &&
-                  currentQuestion.answers.includes(choice.letter) &&
-                  "border-2 border-green-600"
-              )}
+              {currentQuestion.choices.map((choice) => (
+                <Radio
+                  value={choice.letter}
+                  key={"choice" + choice.letter}
+                  classNames={{
+                    base: cn(
+                      "max-w-full rounded-lg border-2 border-transparent",
+                      currentQuestion.isSubmitted &&
+                        currentQuestion.answers.includes(choice.letter) &&
+                        "border-green-600"
+                    ),
+                    label: cn("ml-2"),
+                  }}
+                >
+                  <span className="font-semibold">{choice.letter}.</span>&nbsp;
+                  {choice.text}
+                </Radio>
+              ))}
+            </RadioGroup>
+          ) : (
+            <CheckboxGroup
+              value={currentQuestion.userAnswers}
+              onValueChange={(change) => selectQuizAnswers(change)}
+              isDisabled={currentQuestion.isSubmitted}
             >
-              {choice.letter}. {choice.text}
-            </Checkbox>
-          ))}
-        </CheckboxGroup>
-      )}
-
-      <Button
-        onClick={submitQuizAnswers}
-        disabled={currentQuestion.userAnswers.length === 0}
-      >
-        Check Answer
-      </Button>
-      <Button onClick={() => setIndex(index - 1)} disabled={index === 0}>
-        Previous
-      </Button>
-      <Button
-        onClick={() => setIndex(index + 1)}
-        disabled={index >= quizQuestions.length || !currentQuestion.isSubmitted}
-      >
-        Next
-      </Button>
-    </>
+              {currentQuestion.choices.map((choice) => (
+                <Checkbox
+                  value={choice.letter}
+                  key={"choice" + choice.letter}
+                  classNames={{
+                    base: cn(
+                      "max-w-full rounded-lg border-2 border-transparent",
+                      currentQuestion.isSubmitted &&
+                        currentQuestion.answers.includes(choice.letter) &&
+                        "border-green-600"
+                    ),
+                    label: cn("ml-2"),
+                  }}
+                >
+                  {choice.letter}. {choice.text}
+                </Checkbox>
+              ))}
+            </CheckboxGroup>
+          )}
+        </CardBody>
+        <CardFooter className="px-6">
+          <div className={cn("w-full flex justify-between")}>
+            <Button
+              variant="light"
+              color="primary"
+              onClick={() => setIndex(index - 1)}
+              isDisabled={index === 0}
+            >
+              Previous
+            </Button>
+            {currentQuestion.isSubmitted ? (
+              <Button
+                variant="solid"
+                color="primary"
+                onClick={() => setIndex(index + 1)}
+                isDisabled={
+                  index >= quizQuestions.length || !currentQuestion.isSubmitted
+                }
+              >
+                Next
+              </Button>
+            ) : (
+              <Button
+                variant="solid"
+                color="primary"
+                onClick={submitQuizAnswers}
+                isDisabled={currentQuestion.userAnswers.length === 0}
+              >
+                Check Answer
+              </Button>
+            )}
+          </div>
+        </CardFooter>
+      </Card>
+    </main>
   );
 }
 
