@@ -13,6 +13,12 @@ for (const fileName of htmlFileNames) {
   questions = questions.concat(scrapeQuestionsFromFile(filePath));
 }
 
+questions.sort((a, b) => {
+  const aNum = a.id.split("#").pop();
+  const bNum = b.id.split("#").pop();
+  return parseInt(aNum, 10) - parseInt(bNum, 10);
+});
+
 fs.writeJSONSync(jsonOutputFile, questions);
 console.log(questions.length, "questions written to", jsonOutputFile);
 
