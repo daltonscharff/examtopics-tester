@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "14"
+          node-version: "20"
           cache: yarn
           cache-dependency-path: ./tester-ui
       - name: Install dependencies
