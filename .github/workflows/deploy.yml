@@ -14,11 +14,12 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./tester-ui
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          sparse-checkout: tester-ui
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
