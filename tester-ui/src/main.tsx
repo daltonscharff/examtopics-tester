@@ -7,20 +7,25 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Quiz from "./pages/Quiz.tsx";
 import Study from "./pages/Study.tsx";
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <App />,
+    },
+    {
+      path: "study",
+      element: <Study />,
+    },
+    {
+      path: "quiz/:questionRange",
+      element: <Quiz />,
+    },
+  ],
   {
-    path: "/",
-    element: <App />,
-  },
-  {
-    path: "study",
-    element: <Study />,
-  },
-  {
-    path: "quiz/:questionRange",
-    element: <Quiz />,
-  },
-]);
+    basename: "/examtopics-tester",
+  }
+);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
