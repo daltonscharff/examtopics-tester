@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuestionsStore } from "./store/questionsStore";
 import { useAnswerStore } from "./store/answerStore";
 import Navbar from "./components/Navbar";
+import { ChevronRightIcon } from "@heroicons/react/24/outline";
 
 const QUIZ_LENGTH = 10;
 
@@ -42,8 +43,11 @@ function App() {
                 key={`/quiz/${start}...${end}`}
               >
                 <Card className="rounded-sm hover:bg-zinc-50">
-                  <CardBody className="px-4">
-                    Questions #{start} - #{end}
+                  <CardBody className="flex flex-row justify-between items-center">
+                    <span className="px-1">
+                      Questions #{start} - #{end}
+                    </span>
+                    <ChevronRightIcon className="h-4 w-4" />
                   </CardBody>
                   <Progress
                     size="sm"
