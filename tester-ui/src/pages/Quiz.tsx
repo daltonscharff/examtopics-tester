@@ -82,7 +82,7 @@ function Quiz() {
                     key={"choice" + choice.letter}
                     classNames={{
                       base: cn(
-                        "max-w-full rounded-lg border-2 border-transparent",
+                        "max-w-full rounded-lg border-2 border-transparent my-[-5px]",
                         currentQuestion.isSubmitted &&
                           currentQuestion.answers.includes(choice.letter) &&
                           "border-green-600"
@@ -110,7 +110,7 @@ function Quiz() {
                     key={"choice" + choice.letter}
                     classNames={{
                       base: cn(
-                        "max-w-full rounded-lg border-2 border-transparent",
+                        "max-w-full rounded-lg border-2 border-transparent my-[-5px]",
                         currentQuestion.isSubmitted &&
                           currentQuestion.answers.includes(choice.letter) &&
                           "border-green-600"
