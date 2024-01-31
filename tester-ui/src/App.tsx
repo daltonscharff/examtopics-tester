@@ -54,6 +54,9 @@ function App() {
                     color="success"
                     aria-label="Percent correct"
                     value={percentCorrect}
+                    classNames={{
+                      track: cn("rounded-none"),
+                    }}
                   />
                 </Card>
               </Link>
