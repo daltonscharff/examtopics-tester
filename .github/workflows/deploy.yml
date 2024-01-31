@@ -17,8 +17,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Change directory
-        run: cd tester-ui
+        with:
+          sparse-checkout: tester-ui
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
