@@ -16,6 +16,7 @@ import { useState } from "react";
 import { Question, useQuestionsStore } from "../store/questionsStore";
 import { useParams } from "react-router-dom";
 import { Answer, useAnswerStore } from "../store/answerStore";
+import shuffle from "lodash/shuffle";
 
 type QuizQuestion = Question & Answer & { isSubmitted: boolean };
 
@@ -29,6 +30,7 @@ function Quiz() {
     getQuestions(parseInt(begin, 10) - 1, parseInt(end, 10) - 1).map(
       (question) => ({
         ...question,
+        choices: shuffle([...question.choices]),
         userAnswers: [],
         isCorrect: false,
         isSubmitted: false,
@@ -72,7 +74,7 @@ function Quiz() {
               onValueChange={(change) => selectQuizAnswers([change])}
               isDisabled={currentQuestion.isSubmitted}
             >
-              {currentQuestion.choices.map((choice) => (
+              {currentQuestion.choices.map((choice, i) => (
                 <Radio
                   value={choice.letter}
                   key={"choice" + choice.letter}
@@ -86,7 +88,10 @@ function Quiz() {
                     label: cn("ml-2"),
                   }}
                 >
-                  <span className="font-semibold">{choice.letter}.</span>&nbsp;
+                  <span className="font-semibold">
+                    {String.fromCharCode(65 + i)}.
+                  </span>
+                  &nbsp;
                   {choice.text}
                 </Radio>
               ))}
@@ -97,7 +102,7 @@ function Quiz() {
               onValueChange={(change) => selectQuizAnswers(change)}
               isDisabled={currentQuestion.isSubmitted}
             >
-              {currentQuestion.choices.map((choice) => (
+              {currentQuestion.choices.map((choice, i) => (
                 <Checkbox
                   value={choice.letter}
                   key={"choice" + choice.letter}
@@ -111,7 +116,10 @@ function Quiz() {
                     label: cn("ml-2"),
                   }}
                 >
-                  {choice.letter}. {choice.text}
+                  <span className="font-semibold">
+                    {String.fromCharCode(65 + i)}.
+                  </span>
+                  &nbsp;{choice.text}
                 </Checkbox>
               ))}
             </CheckboxGroup>
