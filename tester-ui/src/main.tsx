@@ -5,17 +5,12 @@ import "./index.css";
 import { NextUIProvider } from "@nextui-org/react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Quiz from "./pages/Quiz.tsx";
-import Study from "./pages/Study.tsx";
 
 const router = createBrowserRouter(
   [
     {
       path: "/",
       element: <App />,
-    },
-    {
-      path: "study",
-      element: <Study />,
     },
     {
       path: "quiz/:questionRange",
