@@ -66,9 +66,9 @@ function Quiz() {
       <Navbar />
       <main className={cn("container mx-auto p-2 pb-3")}>
         <Card className="rounded-md">
-          <CardHeader className={cn("px-6")}>{currentQuestion.id}</CardHeader>
+          <CardHeader className={cn("px-4")}>{currentQuestion.id}</CardHeader>
           <Divider />
-          <CardBody className={cn("flex flex-col gap-4 px-6")}>
+          <CardBody className={cn("flex flex-col gap-4 px-4")}>
             <p>{currentQuestion.question}</p>
             {currentQuestion.answers.length === 1 ? (
               <RadioGroup
